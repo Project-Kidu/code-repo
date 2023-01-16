@@ -1,0 +1,33 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - model: timm.yaml
+  - paths: default.yaml
+  - extras: default.yaml
+  - hydra: default.yaml
+
+trainer:
+  _target_: pytorch_lightning.Trainer
+  default_root_dir: ${paths.output_dir}
+  min_epochs: 5
+  max_epochs: 10
+  accelerator: auto
+  devices: 1
+  check_val_every_n_epoch: 1
+  deterministic: False
+  auto_lr_find: True
+
+data:
+  _target_: src.data.intel_scene_datamodule.IntelSceneDataModule
+  data_dir: ${paths.data_dir}
+  batch_size: 32
+  train_val_test_split: [13_600, 1_700, 1_734]
+  num_workers: 8
+  pin_memory: False
+
+task_name: "tune"
+
+tags: ["Tune"]
+
+seed: 12345
