@@ -30,7 +30,8 @@ class Timm_LitModule(LightningModule):
         num_class: int,
         net: torch.nn.Module,
         optimizer: torch.optim.Optimizer,
-        scheduler: torch.optim.lr_scheduler,
+        scheduler: torch.optim.lr_scheduler = None,
+        learning_rate: float = 0.1,
     ):
         super().__init__()
 
@@ -56,6 +57,8 @@ class Timm_LitModule(LightningModule):
 
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
+
+        self.learning_rate = learning_rate
 
     def forward(self, x: torch.Tensor):
         return self.net(x)
@@ -224,15 +227,14 @@ class Timm_LitModule(LightningModule):
         Examples:
             https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html#configure-optimizers
         """
-        optimizer = self.hparams.optimizer(params=self.parameters())
+        optimizer = self.hparams.optimizer(params=self.parameters(), lr=self.learning_rate)
         if self.hparams.scheduler is not None:
             scheduler = self.hparams.scheduler(optimizer=optimizer)
             return {
                 "optimizer": optimizer,
                 "lr_scheduler": {
                     "scheduler": scheduler,
-                    "monitor": "val/loss",
-                    "interval": "epoch",
+                    "interval": "step",
                     "frequency": 1,
                 },
             }
