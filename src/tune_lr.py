@@ -30,6 +30,7 @@ from src import utils
 log = utils.get_pylogger(__name__)
 
 
+@utils.task_wrapper
 def tune_learning_rate(cfg: DictConfig) -> Tuple[dict, dict]:
     """Tune the model using LR finder and save the results.
 

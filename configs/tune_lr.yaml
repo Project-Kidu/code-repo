@@ -2,7 +2,6 @@
 
 defaults:
   - _self_
-  - model: timm.yaml
   - paths: default.yaml
   - extras: default.yaml
   - hydra: default.yaml
@@ -25,6 +24,21 @@ data:
   train_val_test_split: [13_600, 1_700, 1_734]
   num_workers: 8
   pin_memory: False
+
+model:
+  _target_: src.models.timm_module.Timm_LitModule
+  optimizer:
+    _target_: torch.optim.Adam
+    _partial_: true
+  scheduler: null
+  net:
+    _target_: timm.models.create_model
+    model_name: resnet18
+    pretrained: true
+    in_chans: 3
+    num_classes: ${model.num_class}
+  num_class: 6
+  learning_rate: 0.001
 
 task_name: "tune"
 

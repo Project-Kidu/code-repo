@@ -3,7 +3,6 @@ _target_: src.models.timm_module.Timm_LitModule
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  weight_decay: 0.0
 
 scheduler:
   _target_: torch.optim.lr_scheduler.OneCycleLR

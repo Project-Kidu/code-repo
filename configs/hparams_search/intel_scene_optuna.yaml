@@ -8,7 +8,7 @@ defaults:
 
 # choose metric which will be optimized by Optuna
 # make sure this is the correct name of some metric logged in lightning module!
-optimized_metric: "val/acc_best"
+optimized_metric: "test/acc"
 
 # here we define Optuna hyperparameter search
 # it optimizes for value returned from function with @hydra.main decorator
@@ -46,6 +46,6 @@ hydra:
     # define hyperparameter search space
     params:
       # data.batch_size: choice(32, 64, 128, 256)
-      data.batch_size: choice(32, 64)
-      model.optimizer.lr: interval(0.0001, 0.1)
-      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.RMSprop)
+      model.net.model_name: choice(resnet18, mobilenetv2_100, densenet121)
+      model.learning_rate: interval(0.0001, 0.1)
+      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.LBFGS)
