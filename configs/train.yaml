@@ -50,6 +50,8 @@ ckpt_path: null
 # seed for random number generators in pytorch, numpy and python.random
 seed: null
 
+# Set this to script the trained model
 script: null
 
+# Set this to Trace the trained model
 trace: null

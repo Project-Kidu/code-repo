@@ -3,15 +3,13 @@ _target_: src.models.timm_module.Timm_LitModule
 optimizer:
   _target_: torch.optim.Adam
   _partial_: true
-  lr: 0.001
-  weight_decay: 0.0
 
 scheduler:
-  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _target_: torch.optim.lr_scheduler.OneCycleLR
   _partial_: true
-  mode: min
-  factor: 0.1
-  patience: 10
+  max_lr: 0.1
+  epochs: ${trainer.max_epochs}
+  steps_per_epoch: 425
 
 net:
   _target_: timm.models.create_model
@@ -21,3 +19,5 @@ net:
   num_classes: ${model.num_class}
 
 num_class: 6
+
+learning_rate: 0.001
