@@ -20,9 +20,9 @@ trainer:
 data:
   _target_: src.data.intel_scene_datamodule.IntelSceneDataModule
   data_dir: ${paths.data_dir}
-  batch_size: 32
+  batch_size: 128
   train_val_test_split: [13_600, 1_700, 1_734]
-  num_workers: 8
+  num_workers: 2
   pin_memory: False
 
 model:

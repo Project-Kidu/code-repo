@@ -23,6 +23,7 @@ trainer:
   max_epochs: 10
 
 data:
-  num_workers: 8
+  batch_size: 128
+  num_workers: 2
 
 script: True
