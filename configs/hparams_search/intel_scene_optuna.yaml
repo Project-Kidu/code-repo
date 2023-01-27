@@ -49,4 +49,4 @@ hydra:
       model.net.model_name: choice(resnet18, mobilenetv2_100, spnasnet_100)
       # Best Initial LR = 0.0002 so the range chosen is (0.0002 - 0.0001), (0.0002 + 0.0008)
       model.learning_rate: interval(0.0001, 0.001)
-      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.LBFGS)
+      model.optimizer._target_: choice(torch.optim.Adam, torch.optim.SGD, torch.optim.RMSprop)

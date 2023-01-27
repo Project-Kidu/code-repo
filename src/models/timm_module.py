@@ -122,7 +122,6 @@ class Timm_LitModule(LightningModule):
         self.log(
             "val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True
         )
-        self.log("hp_metric", self.val_loss, sync_dist=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
@@ -150,6 +149,7 @@ class Timm_LitModule(LightningModule):
         self.log(
             "test/acc", self.test_acc, on_step=False, on_epoch=True, prog_bar=True, sync_dist=True
         )
+        self.log("hp_metric", self.test_acc, sync_dist=True)
 
         return {"loss": loss, "preds": preds, "targets": targets}
 
