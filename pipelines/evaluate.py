@@ -1,19 +1,48 @@
 import json
 import os
+import subprocess
 import tarfile
 from pathlib import Path
 
-import pytorch_lightning as pl
-from dataset import IntelDataModule
-from model import LitResnet
+import hydra
+import pyrootutils
+from omegaconf import DictConfig
+
+pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
+from src import utils
+from src.eval import evaluate
+
+log = utils.get_pylogger(__name__)
 
 ml_root = Path("/opt/ml")
 model_artifacts = ml_root / "processing" / "model"
-dataset_dir = ml_root / "processing" / "test"
+test_data_dir = ml_root / "processing" / "test"
+train_data_dir = ml_root / "processing" / "train"
+batch_size = int(os.environ.get("BATCH_SIZE"))
+model_name = os.environ.get("MODEL")
 
 
-def eval_model(trainer, model, datamodule):
-    test_res = trainer.test(model, datamodule)[0]
+@hydra.main(version_base="1.3", config_path="../configs", config_name="eval.yaml")
+def main(cfg: DictConfig) -> None:
+
+    model_path = model_artifacts / "model.tar.gz"
+
+    with tarfile.open(model_path) as tar:
+        tar.extractall(path=".")
+
+    cfg["tags"] = ["Intel Scene Classification Evaluation"]
+    cfg["ckpt_path"] = "last.ckpt"
+
+    cfg["trainer"]["accelerator"] = "auto"
+    cfg["data"]["batch_size"] = batch_size
+    cfg["data"]["num_workers"] = os.cpu_count()
+    cfg["data"]["train_data_dir"] = train_data_dir.absolute()
+    cfg["data"]["test_data_dir"] = test_data_dir.absolute()
+    cfg["model"]["net"]["model_name"] = model_name
+
+    print(":: Evaluating Model")
+    test_res, _ = evaluate(cfg)
 
     report_dict = {
         "multiclass_classification_metrics": {
@@ -77,6 +106,11 @@ def eval_model(trainer, model, datamodule):
     eval_folder = ml_root / "processing" / "evaluation"
     eval_folder.mkdir(parents=True, exist_ok=True)
 
+    subprocess.check_call(
+        "cp -r /opt/ml/processing/code/logs/* /opt/ml/processing/evaluation/",
+        shell=True,
+    )
+
     out_path = eval_folder / "evaluation.json"
 
     print(f":: Writing to {out_path.absolute()}")
@@ -86,23 +120,4 @@ def eval_model(trainer, model, datamodule):
 
 
 if __name__ == "__main__":
-
-    model_path = "/opt/ml/processing/model/model.tar.gz"
-    with tarfile.open(model_path) as tar:
-        tar.extractall(path=".")
-
-    datamodule = IntelDataModule(
-        train_data_dir=dataset_dir.absolute(),
-        test_data_dir=dataset_dir.absolute(),
-        num_workers=os.cpu_count(),
-    )
-    datamodule.setup()
-
-    model = LitResnet.load_from_checkpoint(checkpoint_path="last.ckpt")
-
-    trainer = pl.Trainer(
-        accelerator="auto",
-    )
-
-    print(":: Evaluating Model")
-    eval_model(trainer, model, datamodule)
+    main()
