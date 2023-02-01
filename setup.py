@@ -11,4 +11,5 @@ setup(
     url="https://github.com/Project-Kidu/code-repo",
     install_requires=["pytorch-lightning", "hydra-core"],
     packages=find_packages(),
+    include_package_data=True,
 )
