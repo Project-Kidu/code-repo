@@ -1,7 +1,12 @@
-# SageMaker PyTorch image
-FROM 763104351884.dkr.ecr.ap-south-1.amazonaws.com/pytorch-inference:1.12.1-cpu-py38-ubuntu20.04-sagemaker
+FROM pytorch/torchserve
 
-WORKDIR /opt/ml
+USER root
+COPY build_artifacts/dockerd-entrypoint.sh /home/model-server/dockerd-entrypoint.sh
+RUN chmod +x /home/model-server/dockerd-entrypoint.sh
 
-COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt && rm -rf /root/.cache/pip
+COPY build_artifacts/config.properties /home/model-server/config.properties
+COPY build_artifacts/index_to_name.json /home/model-server/index_to_name.json
+COPY build_artifacts/intel_scene_handler.py /home/model-server/intel_scene_handler.py
+
+ENTRYPOINT ["/home/model-server/dockerd-entrypoint.sh"]
+CMD ["serve"]
