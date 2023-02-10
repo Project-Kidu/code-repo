@@ -1,5 +1,7 @@
 import argparse
+import json
 import os
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -87,7 +89,19 @@ def generate_train_test_split():
     # split dataset and save to their directories
     print(f":: Extracting Zip {dataset_zip} to {dataset_extracted}")
     extract_archive(from_path=dataset_zip, to_path=dataset_extracted)
+    annotation_meta = ml_root / "input" / "annotations" / "meta"
+    annotation_data = ml_root / "input" / "annotations" / "data"
 
+    print(":: Copying annotated data")
+    for files in annotation_meta.glob("*"):
+        content = json.loads(files.read_text())
+        image_name = content["task"]["data"]["image"].split("/")[-1]
+        annotation_image = annotation_data / image_name
+        if annotation_image.exists():
+            annotation_category = content["result"][0]["value"]["choices"][0]
+            destination_src = ml_root / "dataset" / "train" / annotation_category
+            os.makedirs(destination_src, exist_ok=True)
+            shutil.copy(annotation_image, destination_src / image_name)
     transforms = AlbumentationTransforms(
         [
             A.RandomRotate90(),
